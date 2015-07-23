@@ -36,7 +36,7 @@
 
 (cl-defmacro hy-mbox-for-each-mail (&body body)
   (hy-with-gensyms (next-mail-pos next-mail-marker)
-    `(hy-save-reset-buffer
+    `(hy-save-reset-buffer-state
       (goto-char (point-min))
       (hy-mbox-beginning-of-mail)
       (let ((,next-mail-marker (make-marker)))

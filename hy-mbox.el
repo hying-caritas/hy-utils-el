@@ -35,18 +35,22 @@
       (point))))
 
 (cl-defmacro hy-mbox-for-each-mail (&body body)
-  (hy-with-gensyms (next-mail-pos)
+  (hy-with-gensyms (next-mail-pos next-mail-marker)
     `(hy-save-reset-buffer
       (goto-char (point-min))
       (hy-mbox-beginning-of-mail)
-      (cl-loop
-       for ,next-mail-pos = (hy-mbox-mail-beginning-position 2)
-       do (save-excursion
-	    (save-restriction
-	      (narrow-to-region (point) (or ,next-mail-pos (point-max)))
-	      ,@body))
-       while ,next-mail-pos
-       do (goto-char ,next-mail-pos)))))
+      (let ((,next-mail-marker (make-marker)))
+	(set-marker-insertion-type ,next-mail-marker t)
+	(set-marker ,next-mail-marker 1 (current-buffer))
+	(cl-loop
+	 for ,next-mail-pos = (hy-mbox-mail-beginning-position 2)
+	 when ,next-mail-pos do (set-marker ,next-mail-marker ,next-mail-pos)
+	 do (save-excursion
+	      (save-restriction
+		(narrow-to-region (point) (or ,next-mail-pos (point-max)))
+		,@body))
+	 while ,next-mail-pos
+	 do (goto-char ,next-mail-marker))))))
 
 ;;; For debug only
 (cl-defun hy-mbox-each-mail-head ()

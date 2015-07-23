@@ -4,7 +4,15 @@
 
 (defconst +hy-mbox-mail-begin+ "^From ")
 
-(define-derived-mode hy-mbox-mode text-mode "MBOX"
+(define-derived-mode hy-mbox-mode text-mode "HY-MBOX"
+  (define-key hy-mbox-mode-map (kbd "C-S-a") #'hy-mbox-beginning-of-mail)
+  (define-key hy-mbox-mode-map (kbd "C-S-p") #'hy-mbox-prev-mail)
+  (define-key hy-mbox-mode-map (kbd "C-S-n") #'hy-mbox-next-mail)
+  (setf outline-regexp "From .*")
+  (outline-minor-mode 1)
+  (define-key hy-mbox-mode-map (kbd "<backtab>") #'outline-toggle-children)
+  (define-key hy-mbox-mode-map (kbd "C-<tab>") #'hy-mbox-toggle-show-all)
+  (hide-body)
   "Huang Ying's mbox mode")
 
 (cl-defun hy-mbox-beginning-of-mail (&optional n)
@@ -61,8 +69,20 @@
      (push (buffer-substring (point-min) (line-end-position)) heads))
     (message "%s" (print heads))))
 
-(cl-defun hy-mbox-next-mail-position ()
+(cl-defun hy-mbox-next-mail ()
   (interactive)
-  (message "%d" (or (hy-mbox-mail-beginning-position 2) (point-max))))
+  (hy-mbox-beginning-of-mail 2))
+
+(cl-defun hy-mbox-prev-mail ()
+  (interactive)
+  (hy-mbox-beginning-of-mail 0))
+
+(let ((show nil))
+ (cl-defun hy-mbox-toggle-show-all ()
+   (interactive)
+   (if show
+       (hide-body)
+     (show-all))
+   (setf show (not show))))
 
 (provide 'hy-mbox)

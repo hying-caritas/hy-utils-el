@@ -22,6 +22,21 @@
       (goto-char 1)
       (display-buffer (current-buffer)))))
 
+(defconst +hy-to-strip-chars+ " \t\r\n\f\v")
+
+(cl-defun hy-string-rstrip (str)
+  (cl-loop
+   for n from (1- (length str)) downto 0
+   while (cl-find (aref str n) +hy-to-strip-chars+)
+   finally (cl-return (substring str 0 (1+ n)))))
+
+(cl-defun hy-rstrip ()
+  (interactive)
+  (save-excursion
+    (goto-char (point-max))
+    (while (cl-find (char-before) +hy-to-strip-chars+)
+      (delete-char -1))))
+
 (cl-defmacro hy-save-reset-buffer-state (&body body)
   `(save-excursion
      (save-restriction

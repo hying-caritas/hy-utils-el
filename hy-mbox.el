@@ -1,6 +1,7 @@
 ;; -*- lexical-binding: t -*-
 
 (require 'cl-lib)
+(require 'hy-utils)
 
 (defconst +hy-mbox-mail-begin+ "^From ")
 

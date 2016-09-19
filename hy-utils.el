@@ -37,6 +37,14 @@
     (while (cl-find (char-before) +hy-to-strip-chars+)
       (delete-char -1))))
 
+(cl-defun hy-maplist2 (function list &rest more-lists)
+  (cl-labels ((maplist2 (flist result)
+	       (if (cl-notany #'null flist)
+		   (maplist2 (cl-mapcar #'cddr flist)
+			     (cons (apply function flist) result))
+		 result)))
+    (nreverse (maplist2 (cons list more-lists) nil))))
+
 (cl-defmacro hy-save-reset-buffer-state (&body body)
   `(save-excursion
      (save-restriction
@@ -62,5 +70,24 @@
   (let ((line-begin (line-beginning-position)))
     (beginning-of-line 2)
     (delete-region line-begin (point))))
+
+(cl-defun hy-setenvs (names values)
+  (cl-loop
+   for name in names
+   for val in values
+   do (setenv name val)))
+
+(cl-defmacro hy-with-env ((&rest raw-name-value-list) &body body)
+  (hy-with-gensyms
+   (name-value-list names values old-values)
+   `(let* ((,name-value-list (list ,@raw-name-value-list))
+	   (,names (hy-maplist2 #'car ,name-value-list))
+	   (,values (hy-maplist2 #'car (cdr ,name-value-list)))
+	   (,old-values (cl-mapcar #'getenv ,names)))
+      (unwind-protect
+	  (progn
+	    (hy-setenvs ,names (append ,values '(nil)))
+	    ,@body)
+	(hy-setenvs ,names ,old-values)))))
 
 (provide 'hy-utils)

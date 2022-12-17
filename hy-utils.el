@@ -90,4 +90,11 @@
 	    ,@body)
 	(hy-setenvs ,names ,old-values)))))
 
+(cl-defun hy-add-to-alist (key val alist &key (test #'equal))
+  (cons (cons key val) (cl-remove key alist :test test :key #'car)))
+
+(cl-defmacro hy-add-to-alistf (key val alist &key (test '#'equal))
+  (gv-letplace (getter setter) alist
+    (funcall setter `(hy-add-to-alist ,key ,val ,getter :test ,test))))
+
 (provide 'hy-utils)

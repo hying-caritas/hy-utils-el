@@ -11,7 +11,7 @@
 (cl-defun hy-macroexpand-last-sexp (&optional arg)
   (interactive "P")
   (let* ((debug-on-error t)
-	 (sexp (preceding-sexp))
+	 (sexp (elisp--preceding-sexp))
 	 (expanded (if arg
 		       (macroexpand-all sexp)
 		     (macroexpand sexp))))
